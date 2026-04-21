@@ -5,24 +5,24 @@ import { useState, useMemo, useCallback } from "react";
 // ─────────────────────────────────────────────────────────────────
 const DEFAULT_PROJECT = "Ghent City Marathon";
 const DEFAULT_ACTIVITIES = [
-  { id:"A", name:"Project initiation",    dur:2,  preds:[],          cost:12000, res:"Project Director", pct:100, ac:11200 },
-  { id:"B", name:"City council approval", dur:8,  preds:["A"],       cost:40000, res:"Legal Officer",    pct:100, ac:42000 },
-  { id:"C", name:"Police & road closure", dur:4,  preds:["B"],       cost:15000, res:"Operations",       pct:100, ac:14500 },
-  { id:"D", name:"Insurance & clearance", dur:3,  preds:["A"],       cost:8000,  res:"Project Director", pct:100, ac:7800  },
-  { id:"E", name:"Course route design",   dur:4,  preds:["A"],       cost:18000, res:"Operations",       pct:100, ac:16500 },
-  { id:"F", name:"Course certification",  dur:6,  preds:["E"],       cost:25000, res:"Operations",       pct:100, ac:26000 },
-  { id:"G", name:"Safety infrastructure", dur:3,  preds:["E","C"],   cost:22000, res:"Operations",       pct:0,   ac:0     },
-  { id:"H", name:"Timing installation",   dur:2,  preds:["F","G"],   cost:15000, res:"Logistics",        pct:0,   ac:0     },
-  { id:"I", name:"Registration platform", dur:6,  preds:["A"],       cost:22000, res:"IT Team",          pct:100, ac:23500 },
-  { id:"J", name:"Participant campaign",  dur:4,  preds:["I"],       cost:18000, res:"Marketing",        pct:100, ac:18000 },
-  { id:"K", name:"Race pack production",  dur:3,  preds:["J"],       cost:20000, res:"Logistics",        pct:67,  ac:14500 },
-  { id:"L", name:"Sponsor acquisition",   dur:10, preds:["A"],       cost:55000, res:"Project Director", pct:100, ac:58000 },
-  { id:"M", name:"Supplier contracts",    dur:4,  preds:["L","B"],   cost:35000, res:"Logistics",        pct:50,  ac:19000 },
-  { id:"N", name:"Equipment procurement", dur:3,  preds:["M"],       cost:28000, res:"Logistics",        pct:0,   ac:0     },
-  { id:"O", name:"Water station setup",   dur:1,  preds:["N","G"],   cost:8000,  res:"Logistics",        pct:0,   ac:0     },
-  { id:"P", name:"Brand & website",       dur:5,  preds:["A"],       cost:15000, res:"Marketing",        pct:100, ac:13000 },
-  { id:"Q", name:"Marketing campaign",    dur:8,  preds:["P"],       cost:25000, res:"Marketing",        pct:87,  ac:23000 },
-  { id:"R", name:"Post-event closeout",   dur:2,  preds:["H","K","O","Q"], cost:5000, res:"Project Director", pct:0, ac:0 },
+  { id:"A", name:"Project initiation",    dur:2,  preds:[],          cost:12000, res:"Project Director", pct:100, ac:11200, units:1 },
+  { id:"B", name:"City council approval", dur:8,  preds:["A"],       cost:40000, res:"Legal Officer",    pct:100, ac:42000, units:2 },
+  { id:"C", name:"Police & road closure", dur:4,  preds:["B"],       cost:15000, res:"Operations",       pct:100, ac:14500, units:1 },
+  { id:"D", name:"Insurance & clearance", dur:3,  preds:["A"],       cost:8000,  res:"Project Director", pct:100, ac:7800,  units:1 },
+  { id:"E", name:"Course route design",   dur:4,  preds:["A"],       cost:18000, res:"Operations",       pct:100, ac:16500, units:2 },
+  { id:"F", name:"Course certification",  dur:6,  preds:["E"],       cost:25000, res:"Operations",       pct:100, ac:26000, units:1 },
+  { id:"G", name:"Safety infrastructure", dur:3,  preds:["E","C"],   cost:22000, res:"Operations",       pct:0,   ac:0,     units:2 },
+  { id:"H", name:"Timing installation",   dur:2,  preds:["F","G"],   cost:15000, res:"Logistics",        pct:0,   ac:0,     units:1 },
+  { id:"I", name:"Registration platform", dur:6,  preds:["A"],       cost:22000, res:"IT Team",          pct:100, ac:23500, units:2 },
+  { id:"J", name:"Participant campaign",  dur:4,  preds:["I"],       cost:18000, res:"Marketing",        pct:100, ac:18000, units:1 },
+  { id:"K", name:"Race pack production",  dur:3,  preds:["J"],       cost:20000, res:"Logistics",        pct:67,  ac:14500, units:1 },
+  { id:"L", name:"Sponsor acquisition",   dur:10, preds:["A"],       cost:55000, res:"Project Director", pct:100, ac:58000, units:1 },
+  { id:"M", name:"Supplier contracts",    dur:4,  preds:["L","B"],   cost:35000, res:"Logistics",        pct:50,  ac:19000, units:2 },
+  { id:"N", name:"Equipment procurement", dur:3,  preds:["M"],       cost:28000, res:"Logistics",        pct:0,   ac:0,     units:1 },
+  { id:"O", name:"Water station setup",   dur:1,  preds:["N","G"],   cost:8000,  res:"Logistics",        pct:0,   ac:0,     units:1 },
+  { id:"P", name:"Brand & website",       dur:5,  preds:["A"],       cost:15000, res:"Marketing",        pct:100, ac:13000, units:1 },
+  { id:"Q", name:"Marketing campaign",    dur:8,  preds:["P"],       cost:25000, res:"Marketing",        pct:87,  ac:23000, units:2 },
+  { id:"R", name:"Post-event closeout",   dur:2,  preds:["H","K","O","Q"], cost:5000, res:"Project Director", pct:0, ac:0, units:1 },
 ];
 
 // ─────────────────────────────────────────────────────────────────
@@ -107,7 +107,7 @@ function ActivitiesTab({ activities, setActivities, cpm }) {
   const add = () => {
     const used = new Set(activities.map(a=>a.id));
     const id = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").find(l=>!used.has(l)) || `X${activities.length}`;
-    setActivities(prev => [...prev, {id, name:"New activity", dur:1, preds:[], cost:10000, res:"", pct:0, ac:0}]);
+    setActivities(prev => [...prev, {id, name:"New activity", dur:1, preds:[], cost:10000, res:"", pct:0, ac:0, units:1}]);
   };
 
   const TH = ({children, center}) => (
@@ -127,7 +127,7 @@ function ActivitiesTab({ activities, setActivities, cpm }) {
           <thead>
             <tr>
               <TH>ID</TH><TH>Name</TH><TH>Duration (wks)</TH><TH>Predecessors</TH>
-              <TH>Cost (€)</TH><TH>Resource</TH><TH center>ES</TH><TH center>EF</TH>
+              <TH>Cost (€)</TH><TH>Resource</TH><TH center>Units</TH><TH center>ES</TH><TH center>EF</TH>
               <TH center>LS</TH><TH center>LF</TH><TH center>Float</TH><TH center>Status</TH><TH></TH>
             </tr>
           </thead>
@@ -155,6 +155,9 @@ function ActivitiesTab({ activities, setActivities, cpm }) {
                   </td>
                   <td style={td()}>
                     <input value={act.res||""} onChange={e=>update(act.id,"res",e.target.value)} style={{...inp, width:110}} />
+                  </td>
+                  <td style={td(true)}>
+                    <input type="number" min={1} max={10} value={act.units||1} onChange={e=>update(act.id,"units",+e.target.value)} style={{...inp, width:45}} />
                   </td>
                   <td style={td(true)}><span style={{color:C.muted}}>{n.es??"-"}</span></td>
                   <td style={td(true)}><span style={{color:C.muted}}>{n.ef??"-"}</span></td>
@@ -471,6 +474,177 @@ function EVMTab({ activities, setActivities, cpm }) {
 }
 
 // ─────────────────────────────────────────────────────────────────
+// RESOURCE HISTOGRAM
+// ─────────────────────────────────────────────────────────────────
+function buildEarlyStartSchedule(activities, nodes) {
+  const s = {};
+  activities.forEach(a => {
+    const n = nodes[a.id]||{};
+    s[a.id] = { start: n.es||0, end: n.ef||(n.es||0)+a.dur };
+  });
+  return s;
+}
+
+function buildResourceLeveledSchedule(activities, nodes, limit) {
+  const scheduled = {};
+  const usage = {};
+  const getU = t => usage[t]||0;
+
+  const byId = Object.fromEntries(activities.map(a=>[a.id,a]));
+  const visited = new Set(), order = [];
+  function visit(id) {
+    if (visited.has(id)) return;
+    visited.add(id);
+    (byId[id]?.preds||[]).forEach(p=>visit(p));
+    order.push(id);
+  }
+  activities.forEach(a=>visit(a.id));
+
+  order.forEach(id => {
+    const act = byId[id]; if (!act) return;
+    const units = act.units||1;
+    const predEnd = (act.preds||[]).length
+      ? Math.max(...(act.preds||[]).map(p=>scheduled[p]?.end||0))
+      : 0;
+    let start = Math.max(predEnd, nodes[id]?.es||0);
+    for (let safety=0; safety<500; safety++) {
+      let fits = true;
+      for (let t=start; t<start+act.dur; t++) {
+        if (getU(t)+units>limit) { start=t+1; fits=false; break; }
+      }
+      if (fits) break;
+    }
+    scheduled[id] = { start, end: start+act.dur };
+    for (let t=start; t<start+act.dur; t++) usage[t]=(usage[t]||0)+units;
+  });
+  return scheduled;
+}
+
+function assignUnitSlots(schedule, activities) {
+  // For each activity find the lowest base unit slot where all required
+  // unit rows are free for the full duration (correct resource histogram theory)
+  const occupied = new Set(); // "unit,t" strings
+  const taskSlot = {};
+
+  const sorted = [...activities]
+    .filter(a => schedule[a.id])
+    .sort((a, b) => schedule[a.id].start - schedule[b.id].start || (a.id < b.id ? -1 : 1));
+
+  for (const act of sorted) {
+    const { start, end } = schedule[act.id];
+    const units = act.units || 1;
+    let base = 0;
+    outer: while (true) {
+      for (let u = base; u < base + units; u++) {
+        for (let t = start; t < end; t++) {
+          if (occupied.has(`${u},${t}`)) { base = u + 1; continue outer; }
+        }
+      }
+      break;
+    }
+    for (let u = base; u < base + units; u++)
+      for (let t = start; t < end; t++) occupied.add(`${u},${t}`);
+    taskSlot[act.id] = base;
+  }
+  return taskSlot;
+}
+
+function ResourceChart({ title, schedule, activities, cpmNodes, duration, limit }) {
+  const BAR_W=28, UNIT_H=26, PAD_L=42, PAD_B=28, PAD_T=20;
+  const taskSlot = useMemo(() => assignUnitSlots(schedule, activities), [schedule, activities]);
+
+  const maxUsage = activities.reduce((mx, a) => {
+    const b = taskSlot[a.id] ?? 0;
+    return Math.max(mx, b + (a.units || 1));
+  }, limit);
+
+  const H=PAD_T+maxUsage*UNIT_H+PAD_B;
+  const W=PAD_L+(duration+1)*BAR_W+16;
+  const limitY=H-PAD_B-limit*UNIT_H;
+
+  return (
+    <div style={card}>
+      <div style={{fontWeight:600,fontSize:13,marginBottom:10}}>{title}</div>
+      <div style={{overflowX:"auto"}}>
+        <svg width={W} height={H} style={{display:"block",fontFamily:"inherit"}}>
+          {/* row guides */}
+          {Array.from({length:maxUsage+1},(_,i)=>(
+            <line key={i} x1={PAD_L} y1={H-PAD_B-i*UNIT_H} x2={W-6} y2={H-PAD_B-i*UNIT_H}
+              stroke={i===0?"#94a3b8":"#e2e8f0"} strokeWidth={i===0?1:.5}/>
+          ))}
+          {/* resource limit dashed line */}
+          <line x1={PAD_L} y1={limitY} x2={W-6} y2={limitY}
+            stroke={C.red} strokeWidth={1.5} strokeDasharray="6,3"/>
+          <text x={W-4} y={limitY-3} fontSize={9} fill={C.red} textAnchor="end">limit={limit}</text>
+          {/* Y axis */}
+          <line x1={PAD_L} y1={PAD_T} x2={PAD_L} y2={H-PAD_B} stroke="#94a3b8" strokeWidth={1}/>
+          {Array.from({length:maxUsage+1},(_,i)=>(
+            <text key={i} x={PAD_L-5} y={H-PAD_B-i*UNIT_H+4} fontSize={8} fill={C.muted} textAnchor="end">{i}</text>
+          ))}
+          <text x={10} y={H/2} fontSize={9} fill={C.muted} textAnchor="middle"
+            transform={`rotate(-90,10,${H/2})`}>Resource Use</text>
+          {/* X axis */}
+          <line x1={PAD_L} y1={H-PAD_B} x2={W-6} y2={H-PAD_B} stroke="#94a3b8" strokeWidth={1}/>
+          {Array.from({length:duration+1},(_,t)=>(
+            <g key={t}>
+              <line x1={PAD_L+t*BAR_W} y1={H-PAD_B} x2={PAD_L+t*BAR_W} y2={H-PAD_B+4} stroke="#94a3b8" strokeWidth={1}/>
+              {t%5===0&&<text x={PAD_L+t*BAR_W} y={H-PAD_B+14} fontSize={8} fill={C.muted} textAnchor="middle">{t}</text>}
+            </g>
+          ))}
+          <text x={W-6} y={H-PAD_B+14} fontSize={9} fill={C.muted} textAnchor="end">→ Time</text>
+          {/* task blocks */}
+          {activities.map(act=>{
+            const s=schedule[act.id]; if(!s) return null;
+            const base=(taskSlot[act.id]??0);
+            const units=act.units||1;
+            const crit=cpmNodes[act.id]?.critical;
+            const x=PAD_L+s.start*BAR_W+1;
+            const w=(s.end-s.start)*BAR_W-2;
+            const y=H-PAD_B-(base+units)*UNIT_H+1;
+            const h=units*UNIT_H-2;
+            return (
+              <g key={act.id}>
+                <rect x={x} y={y} width={w} height={h}
+                  fill={crit?C.orange:C.teal} opacity={.82} rx={2}/>
+                <text x={x+w/2} y={y+h/2+4} textAnchor="middle"
+                  fontSize={Math.min(10,w-4>0?10:0)} fill={C.white} fontWeight={600}>{act.id}</text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+function ResourceTab({ activities, cpm }) {
+  const {nodes,duration}=cpm;
+  const [limit,setLimit]=useState(4);
+
+  const esSchedule=useMemo(()=>buildEarlyStartSchedule(activities,nodes),[activities,nodes]);
+  const rlSchedule=useMemo(()=>buildResourceLeveledSchedule(activities,nodes,limit),[activities,nodes,limit]);
+  const rlDuration=useMemo(()=>{
+    const ends=Object.values(rlSchedule).map(s=>s.end);
+    return ends.length?Math.max(...ends):duration;
+  },[rlSchedule,duration]);
+
+  return (
+    <div>
+      <div style={{...card,display:"flex",alignItems:"center",gap:16,marginBottom:14}}>
+        <span style={{fontWeight:600,fontSize:13,whiteSpace:"nowrap"}}>Resource limit</span>
+        <input type="range" min={1} max={12} value={limit} onChange={e=>setLimit(+e.target.value)} style={{flex:1}}/>
+        <strong style={{fontSize:20,minWidth:30}}>{limit}</strong>
+        <span style={{color:C.muted,fontSize:11}}>units / period</span>
+      </div>
+      <ResourceChart title="Early-Start Schedule (Resource Use)"
+        schedule={esSchedule} activities={activities} cpmNodes={nodes} duration={duration} limit={limit}/>
+      <ResourceChart title="Resource-Leveled Schedule"
+        schedule={rlSchedule} activities={activities} cpmNodes={nodes} duration={rlDuration} limit={limit}/>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
 // HOVED-APP
 // ─────────────────────────────────────────────────────────────────
 const TABS = [
@@ -478,6 +652,7 @@ const TABS = [
   {id:"gantt",      label:"📊 Gantt"},
   {id:"network",    label:"🕸 Network"},
   {id:"evm",        label:"📈 EVM"},
+  {id:"resources",  label:"⚙️ Resources"},
 ];
 
 export default function App() {
@@ -549,6 +724,7 @@ export default function App() {
         {tab==="gantt"      && <GanttTab      activities={activities} cpm={cpm}/>}
         {tab==="network"    && <NetworkTab     activities={activities} cpm={cpm}/>}
         {tab==="evm"        && <EVMTab         activities={activities} setActivities={setActivities} cpm={cpm}/>}
+        {tab==="resources"  && <ResourceTab    activities={activities} cpm={cpm}/>}
       </div>
     </div>
   );
